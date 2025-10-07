@@ -11,5 +11,5 @@ configMapGenerator:
       - ./templates/
   
   - name: job-env
-    files:
+    env:
       - job.env

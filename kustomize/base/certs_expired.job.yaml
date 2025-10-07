@@ -3,7 +3,11 @@ kind: CronJob
 metadata:
   name: importer-pipeline
 spec:
-  schedule: "0 2 * * *"
+  # Run the job the first of each month at midnight
+  # We don't want to run it more often to avoid spamming users
+  # In any case if certs have expired either the owner knows already,
+  # or if they don't then the app is probably not in use anymore
+  schedule: "0 0 1 * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
