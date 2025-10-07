@@ -1,5 +1,6 @@
-from datetime import datetime
 from registry import Contact, App
+from email.message import EmailMessage
+import smtplib
 import logging
 
 class Emailer:
@@ -10,10 +11,19 @@ class Emailer:
         self._dry_run = dry_run
         self._subject = subject
         self._template = template
+        self._server = None
 
         self._messages: dict[Contact, list[App]] = dict()
+        if not self._dry_run:
+            logging.debug(f"Connecting with SMTP server {self._smtp_server}:{self._smtp_port}")
+            self._server = smtplib.SMTP(self._smtp_server, self._smtp_port)
+
 
     def add(self, app:App):
+        """
+        Add an application to the list of apps whose owners will be notified.
+        Note that if an owner has multiple apps, they will receive a single email listing all apps.
+        """
         if app.contacts is None:
             logging.error(f"App {app._id} has no contact information, skipping")
             return
@@ -27,22 +37,30 @@ class Emailer:
         return len(self._messages)
 
     def send_all(self):
-        if self._dry_run:
-            logging.info("Dry run mode enabled, not sending emails")
-            self.print_messages()
-        else:
-            logging.info("Sending emails (not implemented yet)")
-            # Here you would implement the actual email sending logic using smtplib or similar library
+        """ Send all messages, or print them if dry_run is True """
+        if not self._dry_run and not self._server:
+            raise Exception("SMTP server is not connected")
 
-    def print_messages(self):
         for recipient, apps in self._messages.items():
-            print(f"To: {recipient.email} ({recipient.name})")
-            print(f"From: {self._sender}")
-            body = self._template
-            for app in apps:
-                body = body.replace("{APPLICATION_ID}", app._id)
-                body = body.replace("{EXPIRATION_DATE}", app._expiration_date.strftime('%Y-%m-%d'))
-                body = body.replace("{DAYS_LEFT}", str((app._expiration_date - datetime.now()).days))
-            print("Body:")
-            print(body)
-            print("-----")
+            message = self._prepare_message(recipient, apps)
+            logging.info(f"Sending email to {recipient.email} ({len(apps)} apps)")
+
+            if self._dry_run:
+                print(message)
+                print("----------------------------------------")
+            else:
+                self._server.send_message(message)
+
+    def _prepare_message(self, recipient: Contact, apps:list[App]) -> EmailMessage:
+        message = EmailMessage()
+        message['To']
+        message['Subject'] = self._subject
+        message['From'] = self._sender
+        body = self._template
+        body.replace("{RECIPIENT_NAME}", recipient.name)
+        for app in apps:
+            body.replace("{APPLICATION_ID}", app._id)
+            expiration = app._expiration_date.strftime('%Y-%m-%d') if app._expiration_date else "N/A"
+            body.replace("{EXPIRATION_DATE}", expiration)
+        message.set_content(body)
+        return message
