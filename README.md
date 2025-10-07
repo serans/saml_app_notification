@@ -11,10 +11,13 @@ OKD-compatible kubernetes project files are available under `deployment/` to dep
 docker build -t user-contact-scripts:latest .
 
 docker run --rm \
-  -e APP_API_USERNAME=jon \
-  -e APP_API_PASSWORD=$MY_PASSWORD \
+  -e APP_LOGGING_LEVEL=DEBUG \
+  -e APP_DRY_RUN=True \
+  -e APP_KEYCLOAK_SERVER=auth.cern.ch \
+  -e APP_API_USERNAME="$(cat .secrets/username)" \
+  -e APP_API_PASSWORD="$(cat .secrets/password)" \
   -e APP_SMTP_SERVER=test.com \
-  -e APP_MESSAGE_TEMPLATE_PATH=/app/templates/your-template.txt \
+  -v $(pwd)/templates/example.txt:/app/template.txt \
   user-contact-scripts:latest
 ```
 
