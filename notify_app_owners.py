@@ -60,7 +60,7 @@ if __name__ == "__main__":
         config = Config() # pyright: ignore[reportCallIssue]
     except ValidationError as e:
         for error in e.errors():
-            print(f"{ "".join([str(x) for x in error['loc']]) }: {error['msg']}", file=sys.stderr)
+            print(f"{ ''.join([str(x) for x in error['loc']]) }: {error['msg']}", file=sys.stderr)
         print(f"\nFor more help, run '{sys.argv[0]} --help'\n", file=sys.stderr)
         sys.exit(-1)
 
