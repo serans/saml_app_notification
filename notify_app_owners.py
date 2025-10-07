@@ -47,7 +47,7 @@ class Config(BaseSettings):
     max_emails_to_send: int = Field(100, description="Maximum number of emails to send. Script fails BEFORE sending any email if it's expected to send this many")
 
     # Certificate Settings
-    min_certificate_longevity: int = Field(
+    min_certificate_longevity_days: int = Field(
         60,
         description="If a certificate expires in less than this many days, the message specified in 'message_template' will be sent to the corresponding application owners",
     )

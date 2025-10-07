@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: importer-pipeline
+spec:
+  schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  startingDeadlineSeconds: 300
+  jobTemplate:
+    spec:
+      backoffLimit: 3
+      template:
+        spec:
+          volumes:
+          - name: templates
+            configMap:
+              name: templates
+          containers:
+            - name: notify-app-owners
+              image: gitlab-registry.cern.ch/notify-saml-app-owners:latest
+              imagePullPolicy: Always
+              resources:
+                requests:
+                  cpu: 101m
+                  memory: 2Gi
+                limits:
+                  cpu: 300m
+                  memory: 2Gi
+              volumeMounts:
+                - mountPath: /templates/
+                  name: templates
+              envFrom:
+                - configMapRef:
+                    name: job-env
+              env:
+                - name: APP_MIN_CERTIFICATE_LONGEVITY_DAYS
+                  value: "30"
+                - name: APP_MESSAGE_TEMPLATE_PATH
+                  value: "/templates/about_to_expire.jinja"
+                - name: APP_MESSAGE_SUBJECT
+                  value: "[ACTION REQUIRED] Your application SAML certificate will expire soon"
+          restartPolicy: Never

@@ -1,0 +1,9 @@
+Dear {{ recipient.name }},
+
+You are the owner of the following SAML applications which contain certificates that are about to expire:
+{% for app in apps %}
+- https://application-portal.web.cern.ch/manage/{{ app.name }} - expires {{ app.expiration }}
+{% endfor %}
+
+Best regards,
+The security team

@@ -1,0 +1,15 @@
+resources:
+  - ./certs_expired.job.yaml
+  - ./certs_about_to_expire.job.yaml
+  - ./alerts/oomkilled.alert.yaml
+  - ./alerts/crashloop.alert.yaml
+  - ./alerts/cronfailed.alert.yaml
+
+configMapGenerator:
+  - name: templates
+    files:
+      - ./templates/
+  
+  - name: job-env
+    files:
+      - job.env

@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: my-custom-rules-oomkilled
+spec:
+  groups:
+  - name: kubernetes-apps
+    rules:
+    - alert: ContainerOutOfMemory
+      expr: |
+        (kube_pod_container_status_restarts_total - kube_pod_container_status_restarts_total offset 5m >= 1)
+        and
+        ignoring (reason) min_over_time(kube_pod_container_status_last_terminated_reason{reason="OOMKilled"}[5m]) == 1
+      for: 1m
+      annotations:
+        summary: Pod {{ $labels.pod }} ran out of memory
+        description: |
+          Container {{ $labels.container }} in pod {{ $labels.namespace }}/{{ $labels.pod }} has suffered an OOMKill:
+          the container reached its memory limit and got automatically terminated.
+      labels:
+        receiver: user-alerts-adapter # DO NOT CHANGE!
+        severity: warning # common levels are "info", "warning" and "critical"
