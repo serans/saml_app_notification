@@ -50,7 +50,7 @@ class Emailer:
                 print(message)
                 print("----------------------------------------")
             else:
-                self._server.send_message(message)
+                self._server.send_message(message) # pyright: ignore[reportOptionalMemberAccess]
 
     def _prepare_message(self, recipient: Contact, apps:list[App]) -> EmailMessage:
         message = EmailMessage()

@@ -23,7 +23,7 @@ class App:
     def __init__(self, app_id:str, definition:str):
         self._id = app_id
         self._expiration_date:datetime | None = self._get_expiration_date(definition)
-        self._contact = None
+        self._contact = None # pyright: ignore[reportAttributeAccessIssue]
         self._name = None
 
     def _get_expiration_date(self, definition:str) -> datetime | None:
@@ -42,7 +42,7 @@ class App:
 
         earliest_expiration_date = None
         for cert in certificates:
-            cert_text = cert.text.replace(' ','')
+            cert_text = cert.text.replace(' ','') # pyright: ignore[reportOptionalMemberAccess]
 
             #Add the correct formating to the certificate
             cert_text = f"-----BEGIN CERTIFICATE-----\n{cert_text}\n-----END CERTIFICATE-----"
@@ -73,7 +73,7 @@ class App:
     def name(self) -> str:
         if self._name is None:
             self._retrieve_extra_info()
-        return self._name
+        return self._name # pyright: ignore[reportReturnType]
 
     @property
     def contacts(self) -> list[Contact]:
@@ -177,10 +177,9 @@ class SamlRegistry:
             raise ValueError("Error accessing SAML provider ID")
         saml_provider_id = provider[0]['id']
 
-        # auth_api_get_all returns a list of dicts, despite the type hint saying dict
         saml_apps:list = SamlRegistry.api.auth_api_get_all(
             request_url=f"Registration/{saml_provider_id}/search",
-        ) # type: ignore
+        )# type: ignore
         logging.info(f"Got {len(saml_apps)} registrations")
 
         apps = AppList()
