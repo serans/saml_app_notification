@@ -28,7 +28,7 @@ class App:
         certificates = root.findall('.//ds:X509Certificate', App._NAMESPACE)
 
         if not certificates:
-            logging.info(f'No certificates found for application with id: {self._id}')
+            logging.debug(f'No certificates found for application with id: {self._id}')
             return None
 
         earliest_expiration_date = None
