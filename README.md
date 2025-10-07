@@ -5,9 +5,24 @@ The script also publishes a prometheus-compatible `.txt` file with relevant metr
 
 OKD-compatible kubernetes project files are available under `deployment/` to deploy the script at CERN
 
+# Building
+
+```bash
+docker build -t user-contact-scripts:latest .
+
+docker run --rm \
+  -e APP_API_USERNAME=jon \
+  -e APP_API_PASSWORD=$MY_PASSWORD \
+  -e APP_SMTP_SERVER=test.com \
+  -e APP_MESSAGE_TEMPLATE_PATH=/app/templates/your-template.txt \
+  user-contact-scripts:latest
+```
+
 # Testing
 
-`pytest -q`
+```bash
+pytest -q
+```
 
 # Credit
 - Based on CERN's `user-contact-scripts`
