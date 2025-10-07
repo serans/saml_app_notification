@@ -2,6 +2,7 @@ from registry import Contact, App
 from email.message import EmailMessage
 import smtplib
 import logging
+from jinja2 import Template
 
 class Emailer:
     def __init__(self, smtp_server:str, smtp_port:int, sender:str, subject:str, template:str, dry_run:bool):
@@ -56,13 +57,17 @@ class Emailer:
         message['To'] = recipient.email
         message['Subject'] = self._subject
         message['From'] = self._sender
-        body = self._template
-        body = body.replace("{RECIPIENT_NAME}", recipient.name)
 
-        application_list = ""
-        for app in apps:
-            expiration = app._expiration_date.strftime("%Y-%m-%d") if app._expiration_date else "N/A"
-            application_list += f'{app._id} - expires { expiration }\n'
-        body = body.replace("{APPLICATION_LIST}", application_list)
+        template = self._template
+        context = {
+            'recipient': {'email': recipient.email, 'name': recipient.name},
+            'apps': [{
+                'id':app._id, 
+                'expiration': app._expiration_date.strftime("%Y-%m-%d") 
+                    if app._expiration_date else "N/A"}
+                for app in apps]
+        }
+
+        body = Template(template).render(**context)
         message.set_content(body)
         return message

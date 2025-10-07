@@ -6,7 +6,7 @@ import smtplib
 from unittest import mock
 
 def test_prepare_message_replacements():
-    template = "App {APPLICATION_ID} owned by {RECIPIENT_NAME} notified for {APPLICATION_LIST}."
+    template = "App {{ apps[0].id }} expirint {{ apps[0].expiration }} owned by {{ recipient.name }}"
     recipient = Contact(email='user@example.com', name='Alice')
     app = App('my-app', '<root></root>')
     # set a fake expiration date for the test
@@ -24,7 +24,7 @@ def test_prepare_message_replacements():
 
 
 def test_prepare_message_no_expiration():
-    template = "App {APPLICATION_ID} notified for {APPLICATION_LIST}."
+    template = "{% for app in apps %}App {{ app.id }} expires {{ app.expiration }}\n{% endfor %}"
     recipient = Contact(email='user@example.com', name='Bob')
     app = App('no-exp', '<root></root>')
     app._expiration_date = None
@@ -72,7 +72,7 @@ def test_send_all_dry_run_prints(capsys):
     app._expiration_date = None
     app._contact = [recipient]
 
-    template = "Hi {RECIPIENT_NAME} - {APPLICATION_LIST}"
+    template = "Hi {{ recipient.name }} - {% for app in apps %}{{ app.id }} {% endfor %}"
     e = Emailer(smtp_server='localhost', smtp_port=25, sender='s', subject='sub', template=template, dry_run=True)
     e.add(app)
     e.send_all()
@@ -88,7 +88,7 @@ def test_send_all_uses_smtp(mock_smtp):
     app._expiration_date = None
     app._contact = [recipient]
 
-    template = "X {RECIPIENT_NAME} {APPLICATION_ID}"
+    template = "X {{ recipient.name }} {{ apps[0].id }}"
     # create Emailer not in dry run mode; patching SMTP ensures no network
     e = Emailer(smtp_server='smtp.test', smtp_port=1025, sender='s', subject='sub', template=template, dry_run=False)
     e.add(app)
