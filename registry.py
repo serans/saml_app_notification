@@ -9,6 +9,14 @@ class Contact:
         self.email = email
         self.name = name
 
+    def __eq__(self, other):
+        if isinstance(other, Contact):
+            return self.email == other.email
+        return False
+
+    def __hash__(self):
+        return hash(self.email)
+
 class App:
     _NAMESPACE = {'ds': "http://www.w3.org/2000/09/xmldsig#"}
 
@@ -81,7 +89,7 @@ class App:
         Raises:
             ValueError: If the application data cannot be accessed or is not found for the given application ID.
         """
-        
+
         application_data = SamlRegistry.api.auth_api_get_all(
             request_url=f"Application",
             params = {

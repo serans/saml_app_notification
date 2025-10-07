@@ -108,8 +108,10 @@ if __name__ == "__main__":
 
     # Add apps to be notified by email
     for app in apps:
-        logging.info(f"App {app._id} expires on {app._expiration_date}")
-        emailer.add(app) # type: ignore
+        emailer.add(app)
+        logging.info(f"App {app.name} expires on {app._expiration_date}")
+
+    logging.info(f"Prepared {emailer.num_messages()} email(s) to send")
 
     if emailer.num_messages() > config.max_emails_to_send:
         logging.error(f"Number of messages to send ({emailer.num_messages()}) exceeds the configured maximum ({config.max_emails_to_send}). Aborting")
