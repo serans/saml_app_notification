@@ -5,7 +5,10 @@ The script also publishes a prometheus-compatible `.txt` file with relevant metr
 
 OKD-compatible kubernetes project files are available under `deployment/` to deploy the script at CERN
 
+# Testing
+
+`pytest -q`
+
 # Credit
 - Based on CERN's `user-contact-scripts`
 - In turn largely based on AuthScripts project
-
