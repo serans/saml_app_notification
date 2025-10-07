@@ -66,6 +66,19 @@ def test_add_and_num_messages():
     e.add(app4)
     assert e.num_messages() == 2
 
+def test_same_contact():
+    # Same Contact stored in two different objects should still be considered as the same
+    a1 = Contact(email='a@a.com', name='A')
+    a2 = Contact(email='a@a.com', name='A')
+    app1 = App('app1', '<root></root>')
+    app2 = App('app2', '<root></root>')
+    app1._contact = [a1]
+    app2._contact = [a2]
+    e = Emailer(smtp_server='localhost', smtp_port=25, sender='s', subject='sub', template='t', dry_run=True)
+    e.add(app1)
+    e.add(app2)
+    assert e.num_messages() == 1
+
 def test_send_all_dry_run_prints(capsys):
     recipient = Contact(email='x@y.com', name='X')
     app = App('id2', '<root></root>')
