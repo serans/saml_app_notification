@@ -16,6 +16,7 @@ class App:
         self._id = app_id
         self._expiration_date:datetime | None = self._get_expiration_date(definition)
         self._contact = None
+        self._name = None
 
     def _get_expiration_date(self, definition:str) -> datetime | None:
         """ Parses the XML definition of the SAML application to extract the earliest certificate expiration date.
@@ -60,58 +61,68 @@ class App:
 
         return earliest_expiration_date
 
+    @property
+    def name(self) -> str:
+        if self._name is None:
+            self._retrieve_extra_info()
+        return self._name
 
     @property
     def contacts(self) -> list[Contact]:
+        if self._contact is None:
+            self._retrieve_extra_info()
+        return self._contact
+
+    def _retrieve_extra_info(self):
         """
-        Fetches contact information (owners and administrators) for this application from the API.
+        Fetches app name and contact information for this application from the API.
         This method lazy-loads contact data to avoid overloading the API with requests.
 
         Raises:
             ValueError: If the application data cannot be accessed or is not found for the given application ID.
         """
-        if self._contact is None:
-            application_data = SamlRegistry.api.auth_api_get_all(
-                request_url=f"Application",
-                params = {
-                    'field': ['id', 'ownerId', 'administratorsId', 'applicationIdentifier'],
-                    'filter': f'id: {self._id}'
+        
+        application_data = SamlRegistry.api.auth_api_get_all(
+            request_url=f"Application",
+            params = {
+                'field': ['id', 'ownerId', 'administratorsId', 'applicationIdentifier'],
+                'filter': f'id: {self._id}'
+            }
+        )
+
+        if len(application_data) != 1:
+            raise ValueError(f"Error accessing application data for application with id: {self._id}")
+
+        app_info = application_data[0]
+
+        self._contact:list[Contact] = list()
+        if app_info["applicationIdentifier"]:
+            self._name = app_info["applicationIdentifier"]
+        if app_info["ownerId"]:
+            owner = SamlRegistry.api.auth_api_get(
+                request_url=f'Identity/{app_info["ownerId"]}',
+                params={
+                    'field': ["primaryAccountEmail", "displayName"],
                 }
             )
-
-            if len(application_data) != 1:
-                raise ValueError(f"Error accessing application data for application with id: {self._id}")
-
-            app_info = application_data[0]
-
-            self._contact:list[Contact] = list()
-            if app_info["ownerId"]:
-                owner = SamlRegistry.api.auth_api_get(
-                    request_url=f'Identity/{app_info["ownerId"]}',
-                    params={
-                        'field': ["primaryAccountEmail", "displayName"],
-                    }
+            if owner['primaryAccountEmail']:
+                self._contact.append(Contact(
+                    email=owner['primaryAccountEmail'],
+                    name=owner['displayName'])
                 )
-                if owner['primaryAccountEmail']:
-                    self._contact.append(Contact(
-                        email=owner['primaryAccountEmail'],
-                        name=owner['displayName'])
-                    )
 
-            if app_info["administratorsId"]:
-                administrator = SamlRegistry.api.auth_api_get(
-                    request_url=f'Group/{app_info["administratorsId"]}',
-                    params={
-                        'field': ["primaryAccountEmail", "displayName"],
-                    }
+        if app_info["administratorsId"]:
+            administrator = SamlRegistry.api.auth_api_get(
+                request_url=f'Group/{app_info["administratorsId"]}',
+                params={
+                    'field': ["primaryAccountEmail", "displayName"],
+                }
+            )
+            if 'primaryAccountEmail' in administrator and administrator['primaryAccountEmail']:
+                self._contact.append(Contact(
+                    email=administrator['primaryAccountEmail'],
+                    name=administrator['displayName'])
                 )
-                if 'primaryAccountEmail' in administrator and administrator['primaryAccountEmail']:
-                    self._contact.append(Contact(
-                        email=administrator['primaryAccountEmail'],
-                        name=administrator['displayName'])
-                    )
-
-        return self._contact
 
 
 class AppList(list[App]):

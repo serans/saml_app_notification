@@ -52,7 +52,7 @@ class Config(BaseSettings):
         description="If a certificate expires in less than this many days, the message specified in 'message_template' will be sent to the corresponding application owners",
     )
     message_subject: str = Field("SAML certificates expiration", description="Subject line of the notification email")
-    message_template_path: str = Field("/app/template.txt", description="Path of the template file to use for the notification email body")
+    message_template_path: str = Field("/app/template.jinja", description="Path of the template file to use for the notification email body")
 
 if __name__ == "__main__":
     # Read configuration from command line args or ENV variables

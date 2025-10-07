@@ -62,7 +62,8 @@ class Emailer:
         context = {
             'recipient': {'email': recipient.email, 'name': recipient.name},
             'apps': [{
-                'id':app._id, 
+                'id':app._id,
+                'name':app._name,
                 'expiration': app._expiration_date.strftime("%Y-%m-%d") 
                     if app._expiration_date else "N/A"}
                 for app in apps]

@@ -6,7 +6,7 @@ import smtplib
 from unittest import mock
 
 def test_prepare_message_replacements():
-    template = "App {{ apps[0].id }} expirint {{ apps[0].expiration }} owned by {{ recipient.name }}"
+    template = "App {{ apps[0].id }} expiring {{ apps[0].expiration }} owned by {{ recipient.name }}"
     recipient = Contact(email='user@example.com', name='Alice')
     app = App('my-app', '<root></root>')
     # set a fake expiration date for the test
