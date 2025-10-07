@@ -54,7 +54,7 @@ class App:
             cert_expiration = datetime.strptime(cert_expiration, '%Y%m%d%H%M%SZ')
 
             if earliest_expiration_date:
-                earliest_expiration_date = max(cert_expiration, earliest_expiration_date)
+                earliest_expiration_date = min(cert_expiration, earliest_expiration_date)
             else:
                 earliest_expiration_date = cert_expiration
 
