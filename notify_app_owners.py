@@ -29,7 +29,7 @@ class Config(BaseSettings):
     logging_format: str = Field("%(asctime)s - %(levelname)s - %(message)s", description="Logging format")
 
     # API settings
-    keycloak_server: str = Field("keycloak-authzsvc.cern.ch", description="Keycloak server address")
+    keycloak_server: str = Field("auth.cern.ch", description="Keycloak server address")
     api_client_id: str = Field("python-user-scripts", description="API client ID")
     api_url: str = Field("https://authorization-service-api.web.cern.ch/api/v1.0/", description="API URL")
     api_username: str = Field(description="API username")
@@ -52,7 +52,7 @@ class Config(BaseSettings):
         description="If a certificate expires in less than this many days, the message specified in 'message_template' will be sent to the corresponding application owners",
     )
     message_subject: str = Field("SAML certificates expiration", description="Subject line of the notification email")
-    message_template_path: str = Field(description="Path of the template file to use for the notification email body")
+    message_template_path: str = Field("/app/template.txt", description="Path of the template file to use for the notification email body")
 
 if __name__ == "__main__":
     # Read configuration from command line args or ENV variables
@@ -92,7 +92,7 @@ if __name__ == "__main__":
         smtp_port=config.smtp_port,
         sender=config.email_sender,
         subject=config.message_subject,
-        template=config.message_template_path,
+        template=template,
         dry_run=config.dry_run,
     )
 
