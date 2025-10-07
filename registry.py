@@ -105,7 +105,7 @@ class App:
                         'field': ["primaryAccountEmail", "displayName"],
                     }
                 )
-                if administrator['primaryAccountEmail']:
+                if 'primaryAccountEmail' in administrator and administrator['primaryAccountEmail']:
                     self._contact.append(Contact(
                         email=administrator['primaryAccountEmail'],
                         name=administrator['displayName'])
