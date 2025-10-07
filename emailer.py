@@ -53,14 +53,16 @@ class Emailer:
 
     def _prepare_message(self, recipient: Contact, apps:list[App]) -> EmailMessage:
         message = EmailMessage()
-        message['To']
+        message['To'] = recipient.email
         message['Subject'] = self._subject
         message['From'] = self._sender
         body = self._template
-        body.replace("{RECIPIENT_NAME}", recipient.name)
+        body = body.replace("{RECIPIENT_NAME}", recipient.name)
+
+        application_list = ""
         for app in apps:
-            body.replace("{APPLICATION_ID}", app._id)
-            expiration = app._expiration_date.strftime('%Y-%m-%d') if app._expiration_date else "N/A"
-            body.replace("{EXPIRATION_DATE}", expiration)
+            expiration = app._expiration_date.strftime("%Y-%m-%d") if app._expiration_date else "N/A"
+            application_list += f'{app._id} - expires { expiration }\n'
+        body = body.replace("{APPLICATION_LIST}", application_list)
         message.set_content(body)
         return message
