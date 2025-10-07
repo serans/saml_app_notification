@@ -18,6 +18,12 @@ class App:
         self._contact = None
 
     def _get_expiration_date(self, definition:str) -> datetime | None:
+        """ Parses the XML definition of the SAML application to extract the earliest certificate expiration date.
+
+        Returns:
+            datetime | None: The earliest expiration date found among the certificates, or None if no valid
+            certificates are found or they have no expiration date.
+        """
         root = et.fromstring(definition)
         certificates = root.findall('.//ds:X509Certificate', App._NAMESPACE)
 
@@ -57,6 +63,13 @@ class App:
 
     @property
     def contacts(self) -> list[Contact]:
+        """
+        Fetches contact information (owners and administrators) for this application from the API.
+        This method lazy-loads contact data to avoid overloading the API with requests.
+
+        Raises:
+            ValueError: If the application data cannot be accessed or is not found for the given application ID.
+        """
         if self._contact is None:
             application_data = SamlRegistry.api.auth_api_get_all(
                 request_url=f"Application",
@@ -111,6 +124,11 @@ class AppList(list[App]):
 
 
 class SamlRegistry:
+    """ Interface to the SAML applications registry
+    usage:
+        SamlRegistry.init(server, username, password, api_url, client_id)
+        apps = SamlRegistry.get_apps()
+    """
     @staticmethod
     def init(server:str, username:str, password:str, api_url:str, client_id:str):
         SamlRegistry.api = ApiWrapper(
@@ -124,6 +142,8 @@ class SamlRegistry:
 
     @staticmethod
     def get_apps() -> AppList:
+        """ Fetch all SAML applications from the registry """
+
         logging.debug(f"Fetching saml provider ID")
 
         provider = SamlRegistry.api.auth_api_get_all(
