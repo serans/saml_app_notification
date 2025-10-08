@@ -26,9 +26,11 @@ Docker Image
 
 Will create an image called `saml_app_notification:latest`
 
-## Usage
+## Basic Usage
 
-The basic idea is to set a deadline for the certificates, and if the expiration of a certificate happens earlier than the deadline, the app owner will be notified. All parameters can be set either through command line arguments or via ENV variables, and the email templates are written in [jinja](https://jinja.palletsprojects.com/en/stable/)
+The idea is to set a deadline for certificates, and if the expiration of a certificate happens earlier than the deadline the app owner will be notified.
+
+The email templates are written in [jinja](https://jinja.palletsprojects.com/en/stable/), and all parameters can be set either through command line arguments or via ENV variables 
 
 To run using the Docker image:
 1. Create `.secrets/password` and `.secrets/username` with valid credentials.
