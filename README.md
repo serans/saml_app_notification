@@ -30,7 +30,7 @@ Will create an image called `saml_app_notification:latest`
 
 The basic idea is to set a deadline for the certificates, and if the expiration of a certificate happens earlier than the deadline, the app owner will be notified. All parameters can be set either through command line arguments or via ENV variables.
 
-- Run `./notify_app_owners.py` for detailed usage information, and a description of each possible
+- Run `./notify_app_owners.py --help` for detailed usage information, and a description of each config parameter.
 
 The email templates are written in [jinja](https://jinja.palletsprojects.com/en/stable/)
 
