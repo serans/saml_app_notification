@@ -7,3 +7,4 @@ __pycache__/
 old/
 workbooks/
 .pytest_cache/
+build/
