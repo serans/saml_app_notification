@@ -1,5 +1,5 @@
 from authzsvc_api.apiWrapper import ApiWrapper
-from datetime import datetime
+from datetime import datetime, timezone
 import logging
 import defusedxml.ElementTree as et
 from OpenSSL import crypto
@@ -60,7 +60,7 @@ class App:
                 logging.error(f'No expiration date found for certificate in application with id: {id}')
                 continue
             cert_expiration = cert_expiration.decode('utf-8')
-            cert_expiration = datetime.strptime(cert_expiration, '%Y%m%d%H%M%SZ')
+            cert_expiration = datetime.strptime(cert_expiration, '%Y%m%d%H%M%SZ').replace(tzinfo=timezone.utc)
 
             if earliest_expiration_date:
                 earliest_expiration_date = min(cert_expiration, earliest_expiration_date)

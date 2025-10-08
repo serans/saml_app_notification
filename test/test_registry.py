@@ -1,5 +1,5 @@
 from OpenSSL import crypto
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from saml_registry.registry import App, AppList, SamlRegistry
 import pytest
 
@@ -15,11 +15,13 @@ def _make_cert_notafter(dt: datetime) -> str:
 	cert.get_subject().CN = 'test'
 	cert.set_serial_number(1)
 	cert.gmtime_adj_notBefore(0)
-	# compute seconds delta from now to target dt
-	# OpenSSL expects notAfter in format YYYYMMDDHHMMSSZ when setting via gmtime_adj_*
-	# use absolute setting via ASN1-time by setting notAfter directly on the cert object
-	# For simplicity, set notAfter relative to now using gmtime_adj_notAfter
-	delta = int((dt - datetime.now()).total_seconds())
+	# compute seconds delta from now (UTC) to target dt
+	# Use timezone-aware datetimes to avoid flakiness around midnight and local timezone offsets.
+	now = datetime.now(timezone.utc)
+	if dt.tzinfo is None:
+		# assume naive dt is intended as UTC
+		dt = dt.replace(tzinfo=timezone.utc)
+	delta = int((dt - now).total_seconds())
 	cert.gmtime_adj_notAfter(delta)
 	cert.set_issuer(cert.get_subject())
 	cert.set_pubkey(key)
@@ -38,18 +40,19 @@ def test_get_expiration_date_no_cert():
 
 
 def test_get_expiration_date_single_cert():
-	target = datetime.now() + timedelta(days=365)
+	# make target timezone-aware in UTC to avoid local-midnight flakiness
+	target = datetime.now(timezone.utc) + timedelta(days=365)
 	cert_body = _make_cert_notafter(target)
 	xml = f'<root xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:X509Certificate>{cert_body}</ds:X509Certificate></root>'
 	a = App('app-single', xml)
 	assert a._expiration_date is not None
-	# Compare date portion only to avoid minor timezone/seconds differences
-	assert a._expiration_date.date() == target.date()
+	# Compare UTC date portion only to avoid minor timezone/seconds differences
+	assert a._expiration_date.astimezone(timezone.utc).date() == target.astimezone(timezone.utc).date()
 
 
 def test_get_expiration_date_multiple_certs_chooses_earliest():
-	earlier = datetime.now() + timedelta(days=30)
-	later = datetime.now() + timedelta(days=400)
+	earlier = datetime.now(timezone.utc) + timedelta(days=30)
+	later = datetime.now(timezone.utc) + timedelta(days=400)
 	b1 = _make_cert_notafter(earlier)
 	b2 = _make_cert_notafter(later)
 	xml = (
@@ -60,8 +63,8 @@ def test_get_expiration_date_multiple_certs_chooses_earliest():
 	)
 	a = App('app-multi', xml)
 	assert a._expiration_date is not None
-	# registry implementation picks earliers expiration
-	assert a._expiration_date.date() == earlier.date()
+	# registry implementation picks earliest expiration (compare UTC dates)
+	assert a._expiration_date.astimezone(timezone.utc).date() == earlier.astimezone(timezone.utc).date()
 
 
 def test_get_expiration_date_ignores_invalid_certs():
@@ -111,7 +114,7 @@ def test_contacts_property_bad_response(monkeypatch):
 
 
 def test_applist_expiring_by():
-	now = datetime.now()
+	now = datetime.now(timezone.utc)
 	a1 = App('a1', '<root></root>')
 	a2 = App('a2', '<root></root>')
 	a1._expiration_date = now + timedelta(days=1)
