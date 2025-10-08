@@ -42,5 +42,6 @@ To run using the Docker image:
 - `kustomize/base/certs_about_to_expire.job.yaml` contains a full working example
 
 ## Credits
+- Written by [serans](https://github.com/serans)
 - Based on CERN's `user-contact-scripts`
 - In turn largely based on AuthScripts project
