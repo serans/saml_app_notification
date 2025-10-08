@@ -1,31 +1,38 @@
 Emails owners/admins of applications using the SAML provider and whose certificates are going to expire soon or have already expired.
 Each recipient receives one email that contains a list of all their applications.
 
-The script also publishes a prometheus-compatible `.txt` file with relevant metrics (number of expired certificates, number of processing errors, etc)
+OKD-compatible kubernetes project files are available under `kustomize/` to deploy the script at CERN
 
-OKD-compatible kubernetes project files are available under `deployment/` to deploy the script at CERN
+# Installation
 
-# Building
-
-```bash
-docker build -t user-contact-scripts:latest .
-
-docker run --rm \
-  -e APP_LOGGING_LEVEL=DEBUG \
-  -e APP_DRY_RUN=True \
-  -e APP_KEYCLOAK_SERVER=auth.cern.ch \
-  -e APP_API_USERNAME="$(cat .secrets/username)" \
-  -e APP_API_PASSWORD="$(cat .secrets/password)" \
-  -e APP_SMTP_SERVER=test.com \
-  -v $(pwd)/templates/example.txt:/app/template.txt \
-  user-contact-scripts:latest
+Local Installation
+1. (recommended) Create venv:
+```
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
-# Testing
-
-```bash
-pytest -q
+2. Run installation script
 ```
+./utils.sh dev-install
+```
+
+Docker Image
+```
+./utils.sh docker-build
+```
+
+Will create an image called `saml_app_notification:latest`
+
+# Usage
+
+The basic idea is to set a deadline for the certificates, and if the expiration of a certificate happens earlier than the deadline, the app owner will be notified. All parameters can be set either through command line arguments or via ENV variables.
+
+- Run `./notify_app_owners.py` for detailed usage information, and a description of each possible
+
+The email templates are written in [jinja](https://jinja.palletsprojects.com/en/stable/)
+
+- View `kustomize/base/certs_about_to_expire.job.yaml` for a full working example
 
 # Credit
 - Based on CERN's `user-contact-scripts`
