@@ -1,8 +1,6 @@
-import pytest
-from emailer import Emailer
-from registry import Contact, App
 from datetime import datetime
-import smtplib
+from saml_registry.emailer import Emailer
+from saml_registry.registry import Contact, App
 from unittest import mock
 
 def test_prepare_message_replacements():

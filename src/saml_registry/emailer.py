@@ -1,4 +1,4 @@
-from registry import Contact, App
+from .registry import Contact, App
 from email.message import EmailMessage
 import smtplib
 import logging

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 from datetime import datetime, timedelta
-from emailer import Emailer
 from pydantic import Field, SecretStr, ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from registry import SamlRegistry
+from saml_registry.emailer import Emailer
+from saml_registry.registry import SamlRegistry
 import logging
-import sys
 import os
+import sys
 
 class Config(BaseSettings):
     """
@@ -97,7 +97,8 @@ if __name__ == "__main__":
     )
 
     # Read Saml apps that expire within the provided deadline
-    deadline = datetime.now() + timedelta(days=config.min_certificate_longevity)
+    # use the correctly-named field from the settings model
+    deadline = datetime.now() + timedelta(days=config.min_certificate_longevity_days)
     logging.info(f"Filtering applications with certificates expiring before {deadline}")
     apps = SamlRegistry.get_apps().expiring_by(deadline)
 

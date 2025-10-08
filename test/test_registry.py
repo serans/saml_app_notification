@@ -1,10 +1,7 @@
-import logging
-from datetime import datetime, timedelta
 from OpenSSL import crypto
+from datetime import datetime, timedelta
+from saml_registry.registry import App, AppList, SamlRegistry
 import pytest
-
-from registry import App, AppList, SamlRegistry
-
 
 def _make_cert_notafter(dt: datetime) -> str:
 	"""Create a self-signed PEM certificate and return the base64 body text suitable

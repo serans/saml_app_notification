@@ -19,13 +19,17 @@ RUN apt-get update \
 
 # Copy pip.conf so pip can use the internal index defined in the repo
 COPY pip.conf /etc/pip.conf
-COPY requirements.txt /app/
+COPY pyproject.toml /app/
+
+# Copy application source so the package can be built/installed by pip
+COPY ./src /app/src/
 
 RUN pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt
+    && pip install --no-cache-dir /app/
 
-# Copy application code
-COPY registry.py emailer.py notify_app_owners.py /app/
+# Copy the script and a default template into the image
+# The application expects /app/template.jinja by default
+COPY notify_app_owners.py /app/
 
 # Create a non-root user and give ownership of /app
 RUN groupadd -r app && useradd -r -g app app \

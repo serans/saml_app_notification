@@ -1,6 +1,9 @@
-.ipynb_checkpoints/
-__pycache__/
-workbooks/
-old/
+*.egg-info/
 *.swp
+.DS_Store
+.ipynb_checkpoints/
 .secrets
+__pycache__/
+old/
+workbooks/
+.pytest_cache/
